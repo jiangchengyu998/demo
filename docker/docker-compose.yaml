@@ -1,0 +1,9 @@
+services:
+  mytest:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    image: mytest:v2.0.1
+    container_name: mytest
+    ports:
+      - "8081:8080"
