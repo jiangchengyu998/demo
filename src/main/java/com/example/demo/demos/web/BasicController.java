@@ -17,10 +17,7 @@
 package com.example.demo.demos.web;
 
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @author <a href="mailto:chenxilzx1@gmail.com">theonefx</a>
@@ -30,14 +27,14 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class BasicController {
 
     // http://127.0.0.1:8080/hello?name=lisi
-    @RequestMapping("/hello")
+    @RequestMapping(value = "/hello", method = {RequestMethod.GET})
     @ResponseBody
     public String hello(@RequestParam(name = "name", defaultValue = "unknown user") String name) {
         return "Hello " + name;
     }
 
     // http://127.0.0.1:8080/user
-    @RequestMapping("/user")
+    @RequestMapping(value = "/user", method = {RequestMethod.GET})
     @ResponseBody
     public User user() {
         User user = new User();
@@ -47,14 +44,14 @@ public class BasicController {
     }
 
     // http://127.0.0.1:8080/save_user?name=newName&age=11
-    @RequestMapping("/save_user")
+    @RequestMapping(value = "/save_user", method = {RequestMethod.POST})
     @ResponseBody
     public String saveUser(User u) {
         return "user will save: name=" + u.getName() + ", age=" + u.getAge();
     }
 
     // http://127.0.0.1:8080/html
-    @RequestMapping("/html")
+    @RequestMapping(value = "/html", method = {RequestMethod.GET})
     public String html(){
         return "index.html";
     }
