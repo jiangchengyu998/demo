@@ -1,5 +1,13 @@
 pipeline {
   agent any
+
+  environment{
+      harborHost = '192.168.101.102:80'
+      harborRepo = 'repo'
+      harborUser = 'admin'
+      harborPasswd = 'Harbor12345'
+  }
+
   stages {
       stage('拉取Git代码') {
           steps {
@@ -16,6 +24,17 @@ pipeline {
       stage('检测代码质量') {
           steps {
               sh '/var/jenkins_home/sonar-scanner/bin/sonar-scanner -Dsonar.source=./ -Dsonar.projectName=${JOB_NAME} -Dsonar.projectKey=${JOB_NAME} -Dsonar.java.binaries=./target -Dsonar.exclusions=**/*.java -Dsonar.test.exclusions=**/*.java -Dsonar.coverage.exclusions=**/*.java -Dsonar.login=6da0d36ca3a51f8fa2fcad8cff37fd474f2d1a77'
+          }
+      }
+      stage('制作自定义镜像并发布Harbor') {
+          steps {
+              sh '''
+                  mv target/*.jar docker/
+                  docker build -t mytest:$tag ./docker
+                  docker login -u $harborUser -p $harborPasswd $harborHost
+                  docker tag mytest:$tag $harborHost/$harborRepo/mytest:$tag
+                  docker push $harborHost/repo/mytest:$tag
+              '''
           }
       }
 
