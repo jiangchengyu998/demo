@@ -42,6 +42,7 @@ pipeline {
                   docker login -u $harborUser -p $harborPasswd $harborHost
                   docker tag mytest:$tag $harborHost/$harborRepo/mytest:$tag
                   docker push $harborHost/$harborRepo/mytest:$tag
+                  docker image prune -f
               '''
           }
       }
