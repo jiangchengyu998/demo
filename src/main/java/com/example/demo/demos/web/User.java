@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.demo.controller;
+package com.example.demo.demos.web;
 
 /**
  * @author <a href="mailto:chenxilzx1@gmail.com">theonefx</a>
