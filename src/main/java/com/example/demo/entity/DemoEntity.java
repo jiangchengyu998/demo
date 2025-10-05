@@ -1,3 +1,4 @@
+/*
 package com.example.demo.entity;
 
 import javax.persistence.*;
@@ -97,4 +98,4 @@ public class DemoEntity {
                 ", updateTime=" + updateTime +
                 '}';
     }
-}
+}*/
