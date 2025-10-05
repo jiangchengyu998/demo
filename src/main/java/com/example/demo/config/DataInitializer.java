@@ -1,3 +1,4 @@
+/*
 package com.example.demo.config;
 
 import com.example.demo.entity.DemoEntity;
@@ -22,4 +23,4 @@ public class DataInitializer implements CommandLineRunner {
             System.out.println("初始化测试数据完成");
         }
     }
-}
+}*/

@@ -1,3 +1,4 @@
+/*
 package com.example.demo.repository;
 
 import com.example.demo.entity.DemoEntity;
@@ -27,4 +28,4 @@ public interface DemoRepository extends JpaRepository<DemoEntity, Long> {
     
     // 检查代码是否存在
     boolean existsByCode(String code);
-}
+}*/

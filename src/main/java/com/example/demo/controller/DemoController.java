@@ -1,3 +1,4 @@
+/*
 package com.example.demo.controller;
 
 import com.example.demo.entity.DemoEntity;
@@ -78,4 +79,4 @@ public class DemoController {
         boolean deleted = demoService.delete(id);
         return deleted ? ResponseEntity.ok("删除成功") : ResponseEntity.notFound().build();
     }
-}
+}*/

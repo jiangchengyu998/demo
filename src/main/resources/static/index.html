@@ -1,6 +1,361 @@
-<html>
-    <body>
-        <h1>hello word!!!</h1>
-        <p>this is a html v4.0.0!!!</p>
-    </body>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>云朵一键部署平台 - 轻松部署您的应用</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            padding-bottom: 40px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            background-color: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            font-size: 28px;
+            color: #4a6cf7;
+        }
+
+        .logo-text {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2d3748;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: #4a5568;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        nav a:hover {
+            color: #4a6cf7;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 100px 0;
+            color: white;
+        }
+
+        .hero h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            font-weight: 800;
+        }
+
+        .hero p {
+            font-size: 20px;
+            max-width: 700px;
+            margin: 0 auto 30px;
+            opacity: 0.9;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background-color: #ff6b6b;
+            color: white;
+            padding: 14px 32px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 18px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        .cta-button:hover {
+            background-color: #ff5252;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.6);
+        }
+
+        .features {
+            background-color: white;
+            border-radius: 20px;
+            padding: 60px 40px;
+            margin-top: -50px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 50px;
+            font-size: 32px;
+            color: #2d3748;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .feature-card {
+            background-color: #f8fafc;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-icon {
+            font-size: 40px;
+            color: #4a6cf7;
+            margin-bottom: 20px;
+        }
+
+        .feature-title {
+            font-size: 22px;
+            margin-bottom: 15px;
+            color: #2d3748;
+        }
+
+        .feature-description {
+            color: #718096;
+        }
+
+        .demo-section {
+            margin-top: 80px;
+            text-align: center;
+        }
+
+        .demo-box {
+            background-color: #f1f5f9;
+            border-radius: 15px;
+            padding: 40px;
+            margin-top: 30px;
+            text-align: left;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .demo-box h3 {
+            color: #4a6cf7;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        .code-block {
+            background-color: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: monospace;
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+
+        .deploy-button {
+            background-color: #4a6cf7;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .deploy-button:hover {
+            background-color: #3a5bd9;
+        }
+
+        footer {
+            margin-top: 80px;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            nav ul {
+                gap: 15px;
+            }
+
+            .hero h1 {
+                font-size: 36px;
+            }
+
+            .hero p {
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+<header>
+    <div class="container">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">☁️</div>
+                <div class="logo-text">云朵部署</div>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#features">功能</a></li>
+                    <li><a href="#demo">演示</a></li>
+                    <li><a href="#pricing">定价</a></li>
+                    <li><a href="#docs">文档</a></li>
+                    <li><a href="#contact">联系我们</a></li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</header>
+
+<section class="hero">
+    <div class="container">
+        <h1>云朵一键部署平台</h1>
+        <p>简单、快速、安全的应用部署解决方案。只需一键，您的应用即可上线运行。</p>
+        <a href="#demo" class="cta-button">立即体验</a>
+    </div>
+</section>
+
+<section class="features" id="features">
+    <div class="container">
+        <h2 class="section-title">平台特色功能</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h3 class="feature-title">极速部署</h3>
+                <p class="feature-description">采用先进的容器技术，实现秒级应用部署，大幅提升开发效率。</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔒</div>
+                <h3 class="feature-title">安全可靠</h3>
+                <p class="feature-description">多层安全防护，自动备份与恢复，确保您的数据和应用安全无虞。</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h3 class="feature-title">智能监控</h3>
+                <p class="feature-description">实时监控应用性能，提供详细的分析报告，帮助您优化应用表现。</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔄</div>
+                <h3 class="feature-title">自动扩展</h3>
+                <p class="feature-description">根据流量自动调整资源，确保应用在高并发场景下稳定运行。</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🌐</div>
+                <h3 class="feature-title">全球加速</h3>
+                <p class="feature-description">全球多节点部署，CDN加速，让您的应用在任何地方都能快速访问。</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">💾</div>
+                <h3 class="feature-title">数据备份</h3>
+                <p class="feature-description">自动定期备份数据，支持一键恢复，保障您的业务连续性。</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="demo-section" id="demo">
+    <div class="container">
+        <h2 class="section-title">一键部署演示</h2>
+        <div class="demo-box">
+            <h3>HTML应用示例</h3>
+            <p>只需上传您的代码，点击部署按钮，即可完成应用上线。</p>
+
+            <div class="code-block">
+                &lt;!DOCTYPE html&gt;<br>
+                &lt;html lang="zh-CN"&gt;<br>
+                &lt;head&gt;<br>
+                &nbsp;&nbsp;&lt;meta charset="UTF-8"&gt;<br>
+                &nbsp;&nbsp;&lt;title&gt;我的应用&lt;/title&gt;<br>
+                &lt;/head&gt;<br>
+                &lt;body&gt;<br>
+                &nbsp;&nbsp;&lt;h1&gt;欢迎使用云朵部署平台！&lt;/h1&gt;<br>
+                &nbsp;&nbsp;&lt;p&gt;您的应用已成功部署。&lt;/p&gt;<br>
+                &lt;/body&gt;<br>
+                &lt;/html&gt;
+            </div>
+
+            <button class="deploy-button">一键部署此应用</button>
+        </div>
+    </div>
+</section>
+
+<footer>
+    <div class="container">
+        <p>© 2023 云朵一键部署平台 | 让部署变得简单</p>
+        <p>联系方式: contact@yunduo.com | 客服热线: 400-123-4567</p>
+    </div>
+</footer>
+
+<script>
+    // 简单的部署按钮交互效果
+    document.querySelector('.deploy-button').addEventListener('click', function() {
+        const button = this;
+        const originalText = button.textContent;
+
+        button.textContent = '部署中...';
+        button.disabled = true;
+
+        // 模拟部署过程
+        setTimeout(function() {
+            button.textContent = '部署成功！';
+            button.style.backgroundColor = '#10b981';
+
+            // 3秒后恢复原状
+            setTimeout(function() {
+                button.textContent = originalText;
+                button.disabled = false;
+                button.style.backgroundColor = '#4a6cf7';
+            }, 3000);
+        }, 2000);
+    });
+</script>
+</body>
 </html>
