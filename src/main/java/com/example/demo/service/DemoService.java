@@ -1,3 +1,4 @@
+/*
 package com.example.demo.service;
 
 import com.example.demo.entity.DemoEntity;
@@ -70,4 +71,4 @@ public class DemoService {
     public List<DemoEntity> searchByName(String name) {
         return demoRepository.findByNameContaining(name);
     }
-}
+}*/

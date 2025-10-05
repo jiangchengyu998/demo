@@ -1,3 +1,4 @@
+/*
 package com.example.demo.controller;
 
 import org.springframework.stereotype.Controller;
@@ -10,4 +11,4 @@ public class HomeController {
     public String home() {
         return "redirect:/swagger-ui.html";
     }
-}
+}*/

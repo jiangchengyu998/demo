@@ -16,6 +16,7 @@
 
 package com.example.demo.controller;
 
+import io.swagger.annotations.Api;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
  *
  */
 @Controller
+@Api(tags = "BasicController")
 public class BasicController {
 
     // http://127.0.0.1:8080/hello?name=lisi
