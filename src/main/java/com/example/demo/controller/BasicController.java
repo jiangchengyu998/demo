@@ -53,7 +53,7 @@ public class BasicController {
     }
 
     // http://127.0.0.1:8080/html
-    @RequestMapping(value = "/html", method = {RequestMethod.GET})
+    @RequestMapping(value = "/", method = {RequestMethod.GET})
     public String html(){
         return "index.html";
     }
