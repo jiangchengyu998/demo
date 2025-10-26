@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package com.example.demo.demos.web;
+package com.example.demo.controller;
 
+import io.swagger.annotations.Api;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
  *
  */
 @Controller
+@Api(tags = "BasicController")
 public class BasicController {
 
     // http://127.0.0.1:8080/hello?name=lisi
@@ -51,7 +53,7 @@ public class BasicController {
     }
 
     // http://127.0.0.1:8080/html
-    @RequestMapping(value = "/html", method = {RequestMethod.GET})
+    @RequestMapping(value = "/", method = {RequestMethod.GET})
     public String html(){
         return "index.html";
     }

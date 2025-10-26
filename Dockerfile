@@ -3,6 +3,9 @@
 # ————————————————————————————————
 FROM maven:3.8.7-eclipse-temurin-8 AS builder
 
+# 声明构建参数
+ARG SERVER_PORT
+
 # 设置工作目录
 WORKDIR /build
 
