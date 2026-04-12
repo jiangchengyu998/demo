@@ -3,7 +3,7 @@
 
 spring:
   application:
-    name: demo
+    name: test
   mvc:
     # Disable logging of resolved exceptions in Spring MVC
     log-resolved-exception: false
@@ -30,7 +30,7 @@ management:
       prometheus:
         enabled: true
     tags:
-      application: demo
+      application: test
 
 # Database configuration (commented out, preserved from original properties)
 # spring:
