@@ -14,5 +14,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+    - name: Build image
+      run: |
+        docker build \
+          -t 192.168.50.18:5000/myapp:${{ github.sha }} \
+          .
+    - name: Push image
+      run: |
+        docker push 192.168.50.18:5000/myapp:${{ github.sha }}
