@@ -17,8 +17,8 @@ jobs:
     - name: Build image
       run: |
         docker build \
-          -t 192.168.50.18:5000/myapp:${{ github.sha }} \
+          -t 192.168.50.18:5000/demo:${{ github.sha }} \
           .
     - name: Push image
       run: |
-        docker push 192.168.50.18:5000/myapp:${{ github.sha }}
+        docker push 192.168.50.18:5000/demo:${{ github.sha }}
