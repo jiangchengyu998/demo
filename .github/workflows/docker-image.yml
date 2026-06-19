@@ -19,6 +19,16 @@ jobs:
         docker build \
           -t 192.168.50.18:5000/demo:${{ github.sha }} \
           .
+          
     - name: Push image
       run: |
         docker push 192.168.50.18:5000/demo:${{ github.sha }}
+
+    - name: Trigger Jenkins CD
+      run: |
+        curl -X POST \
+          "http://192.168.50.18:8080/job/deploy_api_by_k3s_cd/buildWithParameters" \
+          --user "${{ secrets.JENKINS_USER }}:${{ secrets.JENKINS_TOKEN }}" \
+          --data-urlencode "api_name=demo" \
+          --data-urlencode "GIT_URL=https://github.com/jiangchengyu998/demo.git" \
+          --data-urlencode "TAG=${{ github.sha }}"
