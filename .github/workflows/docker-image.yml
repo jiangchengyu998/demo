@@ -33,12 +33,15 @@ jobs:
         run: |
           docker push ${{ vars.REGISTRY_URL }}/${REPO_NAME}:${TAG}
 
-      - name: Trigger Jenkins CD
+#      - name: Trigger Jenkins CD
+#        run: |
+#          curl -X POST \
+#            "${{ vars.JENKINS_URL }}/job/${{ vars.JENKINS_JOB }}/buildWithParameters" \
+#            --user "${{ secrets.JENKINS_USER }}:${{ secrets.JENKINS_TOKEN }}" \
+#            --data-urlencode "api_name=${REPO_NAME}" \
+#            --data-urlencode "GIT_URL=${GIT_URL}" \
+#            --data-urlencode "branch=main" \
+#            --data-urlencode "TAG=${TAG}"
+      - name: CD
         run: |
-          curl -X POST \
-            "${{ vars.JENKINS_URL }}/job/${{ vars.JENKINS_JOB }}/buildWithParameters" \
-            --user "${{ secrets.JENKINS_USER }}:${{ secrets.JENKINS_TOKEN }}" \
-            --data-urlencode "api_name=${REPO_NAME}" \
-            --data-urlencode "GIT_URL=${GIT_URL}" \
-            --data-urlencode "branch=main" \
-            --data-urlencode "TAG=${TAG}"
+          bash deploy_helm.sh ./cd ${REPO_NAME}.ydphoto.com ${REPO_NAME} ${TAG} dev

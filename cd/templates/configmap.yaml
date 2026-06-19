@@ -1,0 +1,12 @@
+{{- if .Values.config.applicationProperties }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "springboot-api.fullname" . }}-config
+  labels:
+    {{- include "springboot-api.labels" . | nindent 4 }}
+data:
+  application.properties: |
+{{ .Values.config.applicationProperties | indent 4 }}
+{{- end }}
+

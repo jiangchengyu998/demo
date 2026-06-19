@@ -1,0 +1,15 @@
+1. Get the application URL by running these commands after install:
+
+  Release Name: {{ .Release.Name }}
+
+  kubectl get svc --namespace {{ .Release.Namespace }} -l app.kubernetes.io/instance={{ .Release.Name }}
+
+2. To see logs:
+
+  kubectl logs deployment/{{ include "springboot-api.fullname" . }} -n {{ .Release.Namespace }}
+
+3. Example to install with custom values:
+
+  helm install my-api . --set image.repository=myrepo/my-springboot-app --set image.tag=1.2.3 --set service.port=8080
+
+
