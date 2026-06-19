@@ -26,7 +26,7 @@ jobs:
           docker buildx build \
             --platform linux/amd64 \
             --load \
-            -t ${REGISTRY_URL}/${REPO_NAME}:${TAG} \
+            -t ${{ vars.REGISTRY_URL }}/${REPO_NAME}:${TAG} \
             .
 
       - name: Push image
