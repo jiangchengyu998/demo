@@ -24,12 +24,12 @@ jobs:
       - name: Build image
         run: |
           docker build \
-            -t {{ vars.REGISTRY_URL }}/${REPO_NAME}:${TAG} \
+            -t ${{ vars.REGISTRY_URL }}/${REPO_NAME}:${TAG} \
             .
 
       - name: Push image
         run: |
-          docker push {{ vars.REGISTRY_URL }}/${REPO_NAME}:${TAG}
+          docker push ${{ vars.REGISTRY_URL }}/${REPO_NAME}:${TAG}
 
       - name: Trigger Jenkins CD
         run: |
