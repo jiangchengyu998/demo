@@ -40,4 +40,5 @@ jobs:
             --user "${{ secrets.JENKINS_USER }}:${{ secrets.JENKINS_TOKEN }}" \
             --data-urlencode "api_name=${REPO_NAME}" \
             --data-urlencode "GIT_URL=${GIT_URL}" \
+            --data-urlencode "branch=main" \
             --data-urlencode "TAG=${TAG}"
