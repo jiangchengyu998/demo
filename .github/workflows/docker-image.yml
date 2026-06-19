@@ -2,9 +2,9 @@ name: Docker Image CI
 
 on:
   push:
-    branches: ["main"]
-  pull_request: 
-    branches: ["main"]
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
 
@@ -12,30 +12,23 @@ jobs:
 
     runs-on: self-hosted
 
-    env:
-      REPO_NAME: ${{ github.event.repository.name }}
-      GIT_URL: ${{ github.server_url }}/${{ github.repository }}.git
-      TAG: ${{ github.sha }}
-
     steps:
+    - uses: actions/checkout@v4
+    - name: Build image
+      run: |
+        docker build \
+          -t 192.168.50.18:5000/demo:${{ github.sha }} \
+          .
+          
+    - name: Push image
+      run: |
+        docker push 192.168.50.18:5000/demo:${{ github.sha }}
 
-      - uses: actions/checkout@v4
-
-      - name: Build image
-        run: |
-          docker build \
-            -t {{ vars.REGISTRY_URL }}/${REPO_NAME}:${TAG} \
-            .
-
-      - name: Push image
-        run: |
-          docker push {{ vars.REGISTRY_URL }}/${REPO_NAME}:${TAG}
-
-      - name: Trigger Jenkins CD
-        run: |
-          curl -X POST \
-            "${{ vars.JENKINS_URL }}/job/${{ vars.JENKINS_JOB }}/buildWithParameters" \
-            --user "${{ secrets.JENKINS_USER }}:${{ secrets.JENKINS_TOKEN }}" \
-            --data-urlencode "api_name=${REPO_NAME}" \
-            --data-urlencode "GIT_URL=${GIT_URL}" \
-            --data-urlencode "TAG=${TAG}"
+    - name: Trigger Jenkins CD
+      run: |
+        curl -X POST \
+          "http://192.168.50.18:8080/job/deploy_api_by_k3s_cd/buildWithParameters" \
+          --user "${{ secrets.JENKINS_USER }}:${{ secrets.JENKINS_TOKEN }}" \
+          --data-urlencode "api_name=demo" \
+          --data-urlencode "GIT_URL=https://github.com/jiangchengyu998/demo.git" \
+          --data-urlencode "TAG=${{ github.sha }}"
