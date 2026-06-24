@@ -1,17 +1,28 @@
 # demo
 
-这是一个用于验证 GitHub Actions CI/CD 流程的 Spring Boot Demo 项目。项目会被构建成 Docker 镜像，推送到内网 Docker Registry，并通过 Helm 部署到本地 K3s 集群中。
+这是一个用于验证 GitHub Actions CI/CD 流程的 Spring Boot Demo 项目。项目会被构建成 Docker 镜像，推送到内网 Docker Registry，并通过 Helm 部署到本地 K3s 集群。
 
 线上访问地址：[https://demo.ydphoto.com/](https://demo.ydphoto.com/)
 
-## 项目说明
+## 项目概览
 
-当前项目主要用于测试从代码提交到容器构建、镜像推送、Helm 部署和公网访问的完整链路。
+项目重点是验证从代码提交到公网访问的完整部署闭环：
+
+```text
+GitHub main 分支
+  -> GitHub Actions
+  -> self-hosted runner
+  -> Docker build
+  -> Docker Registry
+  -> Helm deploy
+  -> K3s Gateway
+  -> demo.ydphoto.com
+```
 
 技术栈：
 
 - Java 8
-- Spring Boot 2.3.12
+- Spring Boot 2.3.12.RELEASE
 - Maven
 - Docker
 - GitHub Actions self-hosted runner
@@ -67,7 +78,51 @@ flowchart LR
 - VM 上运行 Nginx，负责接收公网流量并转发到 K3s Gateway。
 - VM、`k3s-master`、`k3s-slave1` 通过 Tailscale 打通，三台机器处于同一个虚拟局域网。
 - Spring Boot 应用实际运行在 K3s 集群中。
-- K3s 使用 Gateway API 暴露应用入口，相关 YAML 位于 `cd/templates/httproute.yaml`。
+- K3s 使用 Gateway API 暴露应用入口，HTTPRoute 模板位于 `cd/templates/httproute.yaml`。
+
+## 本地开发
+
+本地启动：
+
+```bash
+mvn spring-boot:run
+```
+
+本地测试：
+
+```bash
+mvn test
+```
+
+打包：
+
+```bash
+mvn clean package
+```
+
+构建 Docker 镜像：
+
+```bash
+docker build -t demo:local .
+```
+
+运行 Docker 容器：
+
+```bash
+docker run --rm -p 8080:8080 demo:local
+```
+
+## 接口
+
+应用启动后可访问：
+
+- `/`：静态首页
+- `/hello?name=world`：测试接口
+- `/user`：测试 JSON 返回
+- `/save_user?name=newName&age=11`：测试表单参数提交，使用 `POST`
+- `/actuator/health`：健康检查
+- `/actuator/prometheus`：Prometheus 指标
+- `/swagger-ui.html`：Swagger UI
 
 ## CI/CD 流程
 
@@ -81,8 +136,8 @@ GitHub Actions 配置位于 `.github/workflows/docker-image.yml`。
 执行环境：
 
 - 使用 `self-hosted` runner
-- 该 runner 部署在阿里云 VM 上
-- VM 上安装了 Docker，可直接执行镜像构建和推送
+- runner 部署在阿里云 VM 上
+- VM 上安装 Docker，可直接执行镜像构建和推送
 
 流程如下：
 
@@ -125,7 +180,7 @@ bash deploy_helm.sh ./cd ${REPO_NAME}.ydphoto.com ${REPO_NAME} ${TAG} dev
 demo.ydphoto.com
 ```
 
-## Helm 部署结构
+## Helm 部署
 
 Helm Chart 位于 `cd/` 目录。
 
@@ -138,57 +193,17 @@ Helm Chart 位于 `cd/` 目录。
 - `cd/templates/httproute.yaml`：Gateway API HTTPRoute
 - `cd/templates/configmap.yaml`：应用配置
 - `cd/templates/hpa.yaml`：HPA 配置
+- `cd/templates/ServiceMonitor.yaml`：Prometheus ServiceMonitor
 
-默认配置中：
+默认配置：
 
 - 服务端口：`8080`
 - 健康检查：`/actuator/health`
 - Prometheus 指标：`/actuator/prometheus`
-- 镜像仓库：通过 `values.yaml` 中的 `image.repository` 控制
-- 镜像版本：通过 `image.tag` 控制
-
-## 本地运行
-
-本地启动：
-
-```bash
-mvn spring-boot:run
-```
-
-本地测试：
-
-```bash
-mvn test
-```
-
-打包：
-
-```bash
-mvn clean package
-```
-
-构建 Docker 镜像：
-
-```bash
-docker build -t demo:local .
-```
-
-运行 Docker 容器：
-
-```bash
-docker run --rm -p 8080:8080 demo:local
-```
-
-## 接口
-
-应用启动后可访问：
-
-- `/`：静态首页
-- `/hello?name=world`：测试接口
-- `/user`：测试 JSON 返回
-- `/actuator/health`：健康检查
-- `/actuator/prometheus`：Prometheus 指标
-- `/swagger-ui.html`：Swagger UI
+- 副本数：`1`
+- 镜像仓库：`192.168.50.18:5000/API-NAME`
+- 镜像版本：`TAG`
+- 运行环境：`SPRING_PROFILES_ACTIVE=ENVIRONMENT`
 
 ## 部署脚本
 
@@ -229,6 +244,8 @@ helm upgrade --install <api_name> <chart_path> -f <temporary-values-file> \
 ├── .github/workflows/docker-image.yml   # GitHub Actions CI/CD workflow
 ├── cd/                                  # Helm Chart
 ├── src/main/java/com/example/demo       # Spring Boot 源码
+├── src/main/java/Main.java              # 独立算法练习类
+├── src/main/java/Main1.java             # 独立算法练习类
 ├── src/main/resources                   # 应用配置与静态资源
 ├── Dockerfile                           # Docker 多阶段构建
 ├── deploy_helm.sh                       # Helm 部署脚本
@@ -238,15 +255,6 @@ helm upgrade --install <api_name> <chart_path> -f <temporary-values-file> \
 
 ## 备注
 
-这个项目的重点不是业务功能，而是验证完整的 CI/CD 部署闭环：
-
-```text
-GitHub main 分支
-  -> GitHub Actions
-  -> VM self-hosted runner
-  -> Docker build
-  -> k3s-master Docker Registry
-  -> Helm deploy
-  -> K3s Gateway
-  -> demo.ydphoto.com
-```
+- `pom.xml` 中配置的 Spring Boot 启动类是 `com.example.demo.DemoApplication`。
+- `src/main/resources/application.yml` 暴露了 `health`、`info`、`prometheus` 等 Actuator 端点。
+- 当前项目主要用于验证 CI/CD 与部署链路，业务功能仅作为测试接口存在。
