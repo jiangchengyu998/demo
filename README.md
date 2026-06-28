@@ -1,260 +1,102 @@
-# demo
+# Cloud Deploy Demo
 
-这是一个用于验证 GitHub Actions CI/CD 流程的 Spring Boot Demo 项目。项目会被构建成 Docker 镜像，推送到内网 Docker Registry，并通过 Helm 部署到本地 K3s 集群。
+云朵一键部署平台 Spring Boot demo。项目保留一个业务资源 `items` 的 CRUD，用 MySQL 持久化，启动时通过 Flyway 管理表结构，并内置 Swagger/OpenAPI、Actuator、Prometheus 指标和 OTEL tracing 出口。
 
-线上访问地址：[https://demo.ydphoto.com/](https://demo.ydphoto.com/)
+## 技术栈
 
-## 项目概览
+- Java 17
+- Spring Boot 3.3.7
+- Spring Web / Validation
+- Spring Data JPA / Hibernate
+- MySQL Connector/J
+- Flyway
+- springdoc-openapi
+- Actuator / Micrometer / OpenTelemetry OTLP
 
-项目重点是验证从代码提交到公网访问的完整部署闭环：
-
-```text
-GitHub main 分支
-  -> GitHub Actions
-  -> self-hosted runner
-  -> Docker build
-  -> Docker Registry
-  -> Helm deploy
-  -> K3s Gateway
-  -> demo.ydphoto.com
-```
-
-技术栈：
-
-- Java 8
-- Spring Boot 2.3.12.RELEASE
-- Maven
-- Docker
-- GitHub Actions self-hosted runner
-- Docker Registry
-- K3s
-- Helm
-- Kubernetes Gateway API
-- Nginx
-- Tailscale
-
-## 架构图
-
-```mermaid
-flowchart LR
-    User["用户浏览器"] --> DNS["域名解析<br/>demo.ydphoto.com"]
-    DNS --> VMNginx["阿里云 VM<br/>公网 IP + Nginx"]
-    VMNginx --> Gateway["K3s Gateway<br/>Traefik Gateway"]
-    Gateway --> Service["Kubernetes Service<br/>demo:8080"]
-    Service --> Pod["Spring Boot Pod<br/>demo"]
-
-    subgraph Tailscale["Tailscale 内网"]
-        VM["阿里云 VM<br/>GitHub Actions Runner<br/>Docker<br/>Nginx"]
-        Master["k3s-master<br/>K3s 控制节点<br/>Docker Registry"]
-        Slave["k3s-slave1<br/>K3s 工作节点"]
-        Gateway
-        Service
-        Pod
-    end
-
-    VMNginx -.运行在.-> VM
-    VM <--> Master
-    Master <--> Slave
-```
-
-## 访问链路
-
-公网访问链路如下：
-
-```text
-用户
-  -> demo.ydphoto.com
-  -> 阿里云 VM 公网 IP
-  -> VM 上的 Nginx
-  -> Tailscale 内网
-  -> K3s Gateway
-  -> Kubernetes Service
-  -> Spring Boot Pod
-```
-
-说明：
-
-- 域名 `demo.ydphoto.com` 解析到阿里云 VM 的公网 IP。
-- VM 上运行 Nginx，负责接收公网流量并转发到 K3s Gateway。
-- VM、`k3s-master`、`k3s-slave1` 通过 Tailscale 打通，三台机器处于同一个虚拟局域网。
-- Spring Boot 应用实际运行在 K3s 集群中。
-- K3s 使用 Gateway API 暴露应用入口，HTTPRoute 模板位于 `cd/templates/httproute.yaml`。
-
-## 本地开发
-
-本地启动：
+## 本地启动
 
 ```bash
 mvn spring-boot:run
 ```
 
-本地测试：
+默认连接：
 
-```bash
-mvn test
+```text
+jdbc:mysql://192.168.50.18:3306/cloud_deploy_demo
+username: root
+password: 通过 SPRING_DATASOURCE_PASSWORD 环境变量注入
 ```
 
-打包：
+应用也支持通过环境变量覆盖，适合部署平台注入：
 
 ```bash
-mvn clean package
-```
-
-构建 Docker 镜像：
-
-```bash
-docker build -t demo:local .
-```
-
-运行 Docker 容器：
-
-```bash
-docker run --rm -p 8080:8080 demo:local
+SPRING_DATASOURCE_URL=jdbc:mysql://host:3306/cloud_deploy_demo \
+SPRING_DATASOURCE_USERNAME=root \
+SPRING_DATASOURCE_PASSWORD=secret \
+OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://otel-collector:4318/v1/traces \
+java -jar target/cloud-deploy-demo.jar
 ```
 
 ## 接口
 
-应用启动后可访问：
+- `GET /api/items`：分页查询
+- `GET /api/items/{id}`：按 ID 查询
+- `POST /api/items`：创建
+- `PUT /api/items/{id}`：更新
+- `DELETE /api/items/{id}`：删除
+- `GET /swagger-ui.html`：Swagger UI
+- `GET /v3/api-docs`：OpenAPI JSON
+- `GET /actuator/health`：健康检查
+- `GET /actuator/prometheus`：Prometheus 指标
 
-- `/`：静态首页
-- `/hello?name=world`：测试接口
-- `/user`：测试 JSON 返回
-- `/save_user?name=newName&age=11`：测试表单参数提交，使用 `POST`
-- `/actuator/health`：健康检查
-- `/actuator/prometheus`：Prometheus 指标
-- `/swagger-ui.html`：Swagger UI
-
-## CI/CD 流程
-
-GitHub Actions 配置位于 `.github/workflows/docker-image.yml`。
-
-触发条件：
-
-- 推送到 `main` 分支
-- 向 `main` 分支发起 Pull Request
-
-执行环境：
-
-- 使用 `self-hosted` runner
-- runner 部署在阿里云 VM 上
-- VM 上安装 Docker，可直接执行镜像构建和推送
-
-流程如下：
-
-```mermaid
-sequenceDiagram
-    participant Dev as Developer
-    participant GitHub as GitHub
-    participant Runner as VM Self-hosted Runner
-    participant Registry as Docker Registry on k3s-master
-    participant K3s as K3s Cluster
-
-    Dev->>GitHub: push / pull_request to main
-    GitHub->>Runner: trigger workflow
-    Runner->>Runner: checkout code
-    Runner->>Runner: docker buildx build
-    Runner->>Registry: docker push image
-    Runner->>K3s: bash deploy_helm.sh ./cd ...
-    K3s->>K3s: helm upgrade --install
-    K3s->>K3s: rollout new Spring Boot Pod
-```
-
-核心步骤：
-
-1. GitHub Actions 在 VM 的 self-hosted runner 上拉取代码。
-2. 使用 Docker 构建 `linux/amd64` 镜像。
-3. 镜像 tag 使用当前提交 SHA：`${{ github.sha }}`。
-4. 镜像推送到 `${{ vars.REGISTRY_URL }}/${REPO_NAME}:${TAG}`。
-5. 执行 `deploy_helm.sh`，通过 Helm 部署到 K3s。
-6. Helm values 中的 `HOSTNAME`、`API-NAME`、`TAG`、`ENVIRONMENT` 会在部署时被替换。
-
-当前 workflow 的部署命令：
+创建示例：
 
 ```bash
-bash deploy_helm.sh ./cd ${REPO_NAME}.ydphoto.com ${REPO_NAME} ${TAG} dev
+curl -X POST http://localhost:8080/api/items \
+  -H 'Content-Type: application/json' \
+  -d '{"name":"demo item","description":"created from curl"}'
 ```
 
-对于本仓库，`REPO_NAME=demo`，因此部署域名为：
+## 数据库
+
+数据库名：`cloud_deploy_demo`
+
+表结构由 `src/main/resources/db/migration/V1__create_items.sql` 管理。JDBC URL 默认带 `createDatabaseIfNotExist=true`，应用可自动创建数据库；如果目标库里已有表但还没有 Flyway 历史，`baseline-on-migrate=true` 会让 Flyway 接管现有 schema。
+
+我已经在 `192.168.50.18` 上创建并验证了：
 
 ```text
-demo.ydphoto.com
+cloud_deploy_demo.items
 ```
 
-## Helm 部署
+## OTEL
 
-Helm Chart 位于 `cd/` 目录。
-
-主要文件：
-
-- `cd/Chart.yaml`：Chart 元信息
-- `cd/values.yaml`：默认部署参数
-- `cd/templates/deployment.yaml`：Kubernetes Deployment
-- `cd/templates/service.yaml`：Kubernetes Service
-- `cd/templates/httproute.yaml`：Gateway API HTTPRoute
-- `cd/templates/configmap.yaml`：应用配置
-- `cd/templates/hpa.yaml`：HPA 配置
-- `cd/templates/ServiceMonitor.yaml`：Prometheus ServiceMonitor
-
-默认配置：
-
-- 服务端口：`8080`
-- 健康检查：`/actuator/health`
-- Prometheus 指标：`/actuator/prometheus`
-- 副本数：`1`
-- 镜像仓库：`192.168.50.18:5000/API-NAME`
-- 镜像版本：`TAG`
-- 运行环境：`SPRING_PROFILES_ACTIVE=ENVIRONMENT`
-
-## 部署脚本
-
-`deploy_helm.sh` 用于生成临时 Helm values 文件，并执行部署。
-
-用法：
-
-```bash
-bash deploy_helm.sh <chart_path> <hostname> <api_name> <tag> <environment>
-```
-
-示例：
-
-```bash
-bash deploy_helm.sh ./cd demo.ydphoto.com demo <git-sha> dev
-```
-
-脚本会将 `cd/values.yaml` 中的占位符替换为实际值：
-
-- `HOSTNAME`
-- `API-NAME`
-- `TAG`
-- `ENVIRONMENT`
-
-然后执行：
-
-```bash
-helm upgrade --install <api_name> <chart_path> -f <temporary-values-file> \
-  --rollback-on-failure \
-  --wait \
-  --timeout 180s
-```
-
-## 目录结构
+应用使用 Micrometer Tracing + OpenTelemetry OTLP exporter。默认 trace endpoint：
 
 ```text
-.
-├── .github/workflows/docker-image.yml   # GitHub Actions CI/CD workflow
-├── cd/                                  # Helm Chart
-├── src/main/java/com/example/demo       # Spring Boot 源码
-├── src/main/java/Main.java              # 独立算法练习类
-├── src/main/java/Main1.java             # 独立算法练习类
-├── src/main/resources                   # 应用配置与静态资源
-├── Dockerfile                           # Docker 多阶段构建
-├── deploy_helm.sh                       # Helm 部署脚本
-├── pom.xml                              # Maven 配置
-└── README.md
+http://localhost:4318/v1/traces
 ```
 
-## 备注
+部署到平台时建议注入：
 
-- `pom.xml` 中配置的 Spring Boot 启动类是 `com.example.demo.DemoApplication`。
-- `src/main/resources/application.yml` 暴露了 `health`、`info`、`prometheus` 等 Actuator 端点。
-- 当前项目主要用于验证 CI/CD 与部署链路，业务功能仅作为测试接口存在。
+```text
+OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://<otel-collector>:4318/v1/traces
+DEPLOYMENT_ENVIRONMENT=dev
+```
+
+如果平台用 Java Agent 统一接入 OTEL，也可以继续通过 `JAVA_OPTS` 或 `JAVA_TOOL_OPTIONS` 注入 agent 参数；应用侧的 Actuator、Prometheus 和 resource attributes 已保留。
+
+## 验证
+
+```bash
+mvn test
+mvn -DskipTests package
+java -jar target/cloud-deploy-demo.jar
+```
+
+Docker 构建：
+
+```bash
+docker build -t cloud-deploy-demo:local .
+docker run --rm -p 8080:8080 cloud-deploy-demo:local
+```
