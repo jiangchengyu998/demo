@@ -33,7 +33,7 @@ password: 通过 SPRING_DATASOURCE_PASSWORD 环境变量注入
 SPRING_DATASOURCE_URL=jdbc:mysql://host:3306/cloud_deploy_demo \
 SPRING_DATASOURCE_USERNAME=root \
 SPRING_DATASOURCE_PASSWORD=secret \
-OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://otel-collector:4318/v1/traces \
+OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://opentelemetry-collector.observability.svc.cluster.local:4318/v1/traces \
 java -jar target/cloud-deploy-demo.jar
 ```
 
@@ -71,16 +71,16 @@ cloud_deploy_demo.items
 
 ## OTEL
 
-应用使用 Micrometer Tracing + OpenTelemetry OTLP exporter。默认 trace endpoint：
+应用使用 Micrometer Tracing + OpenTelemetry OTLP exporter。默认 trace endpoint 来自集群 `observability` 命名空间里的 `opentelemetry-collector` Service：
 
 ```text
-http://localhost:4318/v1/traces
+http://opentelemetry-collector.observability.svc.cluster.local:4318/v1/traces
 ```
 
 部署到平台时建议注入：
 
 ```text
-OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://<otel-collector>:4318/v1/traces
+OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://opentelemetry-collector.observability.svc.cluster.local:4318/v1/traces
 DEPLOYMENT_ENVIRONMENT=dev
 ```
 
