@@ -84,6 +84,18 @@ OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://opentelemetry-collector.observability.
 DEPLOYMENT_ENVIRONMENT=dev
 ```
 
+调试 OTEL 时可以打开或调整这些环境变量：
+
+```text
+OTEL_DEBUG_LOGGING_ENABLED=true
+OTEL_EXPORTER_LOG_LEVEL=DEBUG
+OTEL_SDK_TRACE_EXPORT_LOG_LEVEL=DEBUG
+MICROMETER_TRACING_LOG_LEVEL=INFO
+APP_OBSERVABILITY_LOG_LEVEL=INFO
+```
+
+开启后，应用启动会打印当前 OTEL traces endpoint、service name、环境和采样率；每个 HTTP 请求完成时会打印 `traceId` 和 `spanId`，方便和 Collector/Tempo/Grafana 里的链路数据对照。
+
 如果平台用 Java Agent 统一接入 OTEL，也可以继续通过 `JAVA_OPTS` 或 `JAVA_TOOL_OPTIONS` 注入 agent 参数；应用侧的 Actuator、Prometheus 和 resource attributes 已保留。
 
 ## 验证

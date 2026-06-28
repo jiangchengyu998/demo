@@ -62,6 +62,18 @@ management:
     tracing:
       endpoint: ${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT:http://opentelemetry-collector.observability.svc.cluster.local:4318/v1/traces}
 
+app:
+  otel:
+    debug-logging:
+      enabled: ${OTEL_DEBUG_LOGGING_ENABLED:true}
+
+logging:
+  level:
+    com.example.demo.observability: ${APP_OBSERVABILITY_LOG_LEVEL:INFO}
+    io.micrometer.tracing: ${MICROMETER_TRACING_LOG_LEVEL:INFO}
+    io.opentelemetry.exporter: ${OTEL_EXPORTER_LOG_LEVEL:DEBUG}
+    io.opentelemetry.sdk.trace.export: ${OTEL_SDK_TRACE_EXPORT_LOG_LEVEL:DEBUG}
+
 info:
   app:
     name: ${spring.application.name}
